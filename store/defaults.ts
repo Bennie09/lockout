@@ -3,13 +3,30 @@ import { nid } from '@/lib/id';
 import { todayKey } from '@/lib/time';
 import type { Activity, AppState, ConnectedApp, LockoutWindow, Security } from '@/store/types';
 
+export function normalizeApp(app: Partial<ConnectedApp> & { id: string }): ConnectedApp {
+  return {
+    ...emptyApp(app.id),
+    ...app,
+    scrollCapMinutes: app.scrollCapMinutes ?? 10,
+    cooldownMinutes: app.cooldownMinutes ?? 10,
+    cooldownUntil: app.cooldownUntil ?? 0,
+    usedSecondsToday: app.usedSecondsToday ?? (app.usedMinutesToday ?? 0) * 60,
+    sittingSeconds: app.sittingSeconds ?? 0,
+  };
+}
+
 export function emptyApp(id: string): ConnectedApp {
   return {
     id,
     connected: false,
     dailyLimitMinutes: 120,
+    scrollCapMinutes: 10,
+    cooldownMinutes: 10,
+    cooldownUntil: 0,
     windows: [],
     usedMinutesToday: 0,
+    usedSecondsToday: 0,
+    sittingSeconds: 0,
   };
 }
 
@@ -66,6 +83,12 @@ export function rollDay(state: AppState, now = new Date()): AppState {
     lastResetDate: key,
     lastActiveDate: key,
     streakDays: yesterdayWasYesterday && stayedUnder ? state.streakDays + 1 : stayedUnder ? state.streakDays : 0,
-    apps: state.apps.map((app) => ({ ...app, usedMinutesToday: 0 })),
+    apps: state.apps.map((app) => ({
+      ...app,
+      usedMinutesToday: 0,
+      usedSecondsToday: 0,
+      sittingSeconds: 0,
+      cooldownUntil: 0,
+    })),
   };
 }

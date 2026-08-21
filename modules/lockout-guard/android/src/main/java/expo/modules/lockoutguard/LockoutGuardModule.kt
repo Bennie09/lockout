@@ -21,10 +21,15 @@ class LockoutGuardModule : Module() {
 
     OnCreate {
       val weak = WeakReference(this@LockoutGuardModule)
-      GuardBridge.onBlocked = { appId, pkg ->
+      GuardBridge.onBlocked = { appId, pkg, reason, cooldownUntil ->
         weak.get()?.sendEvent(
           "onBlocked",
-          mapOf("appId" to appId, "packageName" to pkg),
+          mapOf(
+            "appId" to appId,
+            "packageName" to pkg,
+            "reason" to reason,
+            "cooldownUntil" to cooldownUntil,
+          ),
         )
       }
     }
@@ -48,19 +53,23 @@ class LockoutGuardModule : Module() {
       hasUsage(ctx)
     }
 
+    Function("openAppInfo") {
+      val ctx = appContext.reactContext ?: return@Function false
+      val intent = Intent(
+        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+        Uri.parse("package:${ctx.packageName}"),
+      ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      ctx.startActivity(intent)
+      true
+    }
+
     Function("openUsageAccessSettings") {
       val ctx = appContext.reactContext ?: return@Function false
-      val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        data = Uri.parse("package:${ctx.packageName}")
-      }
-      try {
-        ctx.startActivity(intent)
-      } catch (_: Exception) {
-        ctx.startActivity(
-          Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        )
-      }
+      // Open the app list, not the Lockout-only page. Sideloaded APKs on Android 13+
+      // grey out that detail screen as "restricted settings" until App info unlocks it.
+      ctx.startActivity(
+        Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+      )
       true
     }
 
@@ -95,6 +104,30 @@ class LockoutGuardModule : Module() {
       ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
       ctx.startActivity(intent)
       true
+    }
+
+    Function("setWatch") { json: String ->
+      val ctx = appContext.reactContext ?: return@Function false
+      JSONArray(json)
+      ctx.getSharedPreferences(GuardService.PREFS, Context.MODE_PRIVATE)
+        .edit()
+        .putString(GuardService.KEY_WATCH, json)
+        .apply()
+      true
+    }
+
+    Function("setFast") { enabled: Boolean ->
+      val ctx = appContext.reactContext ?: return@Function false
+      ctx.getSharedPreferences(GuardService.PREFS, Context.MODE_PRIVATE)
+        .edit()
+        .putBoolean(GuardService.KEY_FAST, enabled)
+        .apply()
+      true
+    }
+
+    Function("getUsageSnapshot") {
+      val ctx = appContext.reactContext ?: return@Function emptyMap<String, Any>()
+      GuardService.usageSnapshot(ctx)
     }
 
     Function("setBlocked") { json: String ->

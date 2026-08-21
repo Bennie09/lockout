@@ -38,11 +38,24 @@ export function statusForApp(state: AppState, app: ConnectedApp, date = new Date
     reasons.push({ kind: 'window', window });
   }
 
-  if (app.dailyLimitMinutes != null && app.usedMinutesToday >= app.dailyLimitMinutes) {
+  if (app.dailyLimitMinutes != null && app.usedSecondsToday >= app.dailyLimitMinutes * 60) {
     reasons.push({
       kind: 'limit',
-      used: app.usedMinutesToday,
+      used: Math.floor(app.usedSecondsToday / 60),
       cap: app.dailyLimitMinutes,
+    });
+  }
+
+  if (app.cooldownUntil > date.getTime()) {
+    reasons.push({ kind: 'cooldown', until: app.cooldownUntil });
+  } else if (
+    app.scrollCapMinutes != null &&
+    app.sittingSeconds >= app.scrollCapMinutes * 60
+  ) {
+    reasons.push({
+      kind: 'scroll',
+      sitting: Math.floor(app.sittingSeconds / 60),
+      cap: app.scrollCapMinutes,
     });
   }
 
@@ -87,11 +100,20 @@ export function reasonCopy(reason: LockReason) {
   if (reason.kind === 'window') {
     return `${reason.window.label || 'Lockout'} · ${formatTime(reason.window.start)} – ${formatTime(reason.window.end)}`;
   }
-  return `Daily cap reached · ${formatDuration(reason.used)} of ${formatDuration(reason.cap)}`;
+  if (reason.kind === 'limit') {
+    return `Daily cap reached · ${formatDuration(reason.used)} of ${formatDuration(reason.cap)}`;
+  }
+  if (reason.kind === 'scroll') {
+    return `Sitting cap · ${formatDuration(reason.sitting)} of ${formatDuration(reason.cap)} this scroll`;
+  }
+  const wait = Math.max(1, Math.ceil((reason.until - Date.now()) / 60000));
+  return `Cool-down · ${formatDuration(wait)} left before the next sitting`;
 }
 
 export function lockHeadline(status: AppLockStatus) {
   if (!status.locked) return 'Open';
+  if (status.reasons.some((reason) => reason.kind === 'cooldown')) return 'Cool-down';
+  if (status.reasons.some((reason) => reason.kind === 'scroll')) return 'Sitting cap';
   if (status.reasons.some((reason) => reason.kind === 'limit')) return 'Cap hit';
   if (status.reasons.some((reason) => reason.kind === 'universal')) return 'Universal';
   return 'Locked out';

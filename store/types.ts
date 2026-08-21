@@ -13,8 +13,13 @@ export type ConnectedApp = {
   id: string;
   connected: boolean;
   dailyLimitMinutes: number | null;
-  windows: LockoutWindow[];
+  scrollCapMinutes: number | null;
+  cooldownMinutes: number | null;
+  cooldownUntil: number;
   usedMinutesToday: number;
+  usedSecondsToday: number;
+  sittingSeconds: number;
+  windows: LockoutWindow[];
 };
 
 export type Security = {
@@ -49,7 +54,9 @@ export type AppState = {
 export type LockReason =
   | { kind: 'universal'; window: LockoutWindow }
   | { kind: 'window'; window: LockoutWindow }
-  | { kind: 'limit'; used: number; cap: number };
+  | { kind: 'limit'; used: number; cap: number }
+  | { kind: 'scroll'; sitting: number; cap: number }
+  | { kind: 'cooldown'; until: number };
 
 export type AppLockStatus = {
   id: string;

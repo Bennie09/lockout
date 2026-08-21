@@ -4,7 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import { nid } from '@/lib/id';
 import { grantEditGrace, hasEditGrace, isProtectedEdit } from '@/lib/lockout';
 import { todayKey } from '@/lib/time';
-import { createInitialState, pushActivity, rollDay } from '@/store/defaults';
+import { createInitialState, normalizeApp, pushActivity, rollDay } from '@/store/defaults';
 import type { AppState, ConnectedApp, LockoutWindow, Security } from '@/store/types';
 
 const STORAGE_KEY = 'lockout.state.v1';
@@ -14,6 +14,9 @@ type Action =
   | { type: 'COMPLETE_ONBOARDING'; apps: string[]; security: Security; night: boolean }
   | { type: 'SET_CONNECTED'; id: string; connected: boolean }
   | { type: 'SET_LIMIT'; id: string; minutes: number | null }
+  | { type: 'SET_SCROLL_CAP'; id: string; minutes: number | null }
+  | { type: 'SET_COOLDOWN'; id: string; minutes: number | null }
+  | { type: 'SYNC_USAGE'; apps: Record<string, { usedSeconds: number; sittingSeconds: number; cooldownUntil: number }> }
   | { type: 'ADD_USAGE'; id: string; minutes: number }
   | { type: 'ADD_WINDOW'; target: 'universal' | string; window: LockoutWindow }
   | { type: 'UPDATE_WINDOW'; target: 'universal' | string; window: LockoutWindow }
@@ -46,8 +49,14 @@ function withWindows(
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
-    case 'HYDRATE':
-      return rollDay(action.payload);
+    case 'HYDRATE': {
+      const incoming = action.payload;
+      return rollDay({
+        ...createInitialState(),
+        ...incoming,
+        apps: (incoming.apps ?? []).map((app) => normalizeApp(app)),
+      });
+    }
     case 'COMPLETE_ONBOARDING': {
       let next: AppState = {
         ...state,
@@ -59,6 +68,10 @@ function reducer(state: AppState, action: Action): AppState {
         apps: state.apps.map((app) => ({
           ...app,
           connected: action.apps.includes(app.id),
+          usedSecondsToday: 0,
+          usedMinutesToday: 0,
+          sittingSeconds: 0,
+          cooldownUntil: 0,
         })),
       };
       if (action.night) {
@@ -94,10 +107,32 @@ function reducer(state: AppState, action: Action): AppState {
       );
     case 'SET_LIMIT':
       return withApp(state, action.id, (app) => ({ ...app, dailyLimitMinutes: action.minutes }));
+    case 'SET_SCROLL_CAP':
+      return withApp(state, action.id, (app) => ({ ...app, scrollCapMinutes: action.minutes }));
+    case 'SET_COOLDOWN':
+      return withApp(state, action.id, (app) => ({ ...app, cooldownMinutes: action.minutes }));
+    case 'SYNC_USAGE':
+      return {
+        ...state,
+        apps: state.apps.map((app) => {
+          const snap = action.apps[app.id];
+          if (!snap) {
+            return { ...app, sittingSeconds: 0 };
+          }
+          return {
+            ...app,
+            usedSecondsToday: snap.usedSeconds,
+            usedMinutesToday: Math.floor(snap.usedSeconds / 60),
+            sittingSeconds: snap.sittingSeconds,
+            cooldownUntil: snap.cooldownUntil,
+          };
+        }),
+      };
     case 'ADD_USAGE':
       return withApp(state, action.id, (app) => ({
         ...app,
         usedMinutesToday: app.usedMinutesToday + action.minutes,
+        usedSecondsToday: app.usedSecondsToday + action.minutes * 60,
       }));
     case 'ADD_WINDOW':
       return withWindows(state, action.target, (windows) => [...windows, action.window]);

@@ -3,6 +3,7 @@ import { Card } from '@/components/Card';
 import { LockMark } from '@/components/LockMark';
 import { Screen } from '@/components/Screen';
 import { Type } from '@/components/Type';
+import { UsageAccessGuide } from '@/components/UsageAccessGuide';
 import { colors, space } from '@/constants/theme';
 import {
   guardAvailable,
@@ -10,7 +11,6 @@ import {
   hasUsageAccess,
   isIgnoringBatteryOptimizations,
   openOverlaySettings,
-  openUsageAccessSettings,
   requestIgnoreBatteryOptimizations,
 } from 'lockout-guard';
 import { SECRET_COPY, type SecretKind } from '@/lib/secrets';
@@ -93,7 +93,7 @@ export default function YouTab() {
       <Card style={{ marginTop: 12 }}>
         <Type variant="bodyStrong">Preview a lockout</Type>
         <Type variant="caption" style={{ marginTop: 4, marginBottom: 12 }}>
-          See the screen you get when an app is inside a window or over its cap.
+          See the screen you get when an app is inside a window, over its daily cap, or in a sitting cool-down.
         </Type>
         <Button label="Show locked-out screen" variant="ghost" onPress={() => router.push(`/locked/${first}`)} />
       </Card>
@@ -102,7 +102,9 @@ export default function YouTab() {
         <View style={styles.switchRow}>
           <View style={{ flex: 1 }}>
             <Type variant="bodyStrong">Fast demo usage</Type>
-            <Type variant="caption">In a session, 1 second counts as 1 minute so you can test caps tonight.</Type>
+            <Type variant="caption">
+              1 second on Instagram counts as 1 minute, so you can test the daily cap and sitting cap without waiting.
+            </Type>
           </View>
           <Switch
             value={state.fastUsage}
@@ -117,16 +119,12 @@ export default function YouTab() {
         <Type variant="bodyStrong">Android access</Type>
         <Type variant="caption" style={{ marginTop: 4, marginBottom: 12 }}>
           {guardAvailable
-            ? 'Usage access is what actually closes Instagram. Overlay and battery help the watcher stay alive.'
+            ? 'Because this APK is sideloaded, Android locks Usage access until you allow restricted settings from App info.'
             : 'This build cannot talk to other apps. Install the Android APK, not Expo Go, for a real lockout.'}
         </Type>
         {guardAvailable ? (
           <View style={{ gap: 8 }}>
-            <Button
-              label={usage ? 'Usage access on' : 'Grant usage access'}
-              variant={usage ? 'ghost' : 'primary'}
-              onPress={openUsageAccessSettings}
-            />
+            <UsageAccessGuide granted={usage} embedded />
             <Button
               label={overlay ? 'Overlay on' : 'Allow overlay'}
               variant="ghost"

@@ -9,7 +9,7 @@ import { WindowRow } from '@/components/WindowRow';
 import { catalogById } from '@/constants/catalog';
 import { colors, radius, space } from '@/constants/theme';
 import { allStatuses, lockHeadline, todaysSchedule } from '@/lib/lockout';
-import { formatClock, formatDuration, prettyDate } from '@/lib/time';
+import { formatClock, formatDuration, formatSeconds, prettyDate } from '@/lib/time';
 import { useClock } from '@/lib/useClock';
 import { useStore } from '@/store/StoreProvider';
 import { useRouter } from 'expo-router';
@@ -97,7 +97,7 @@ export default function Home() {
           const meta = catalogById(app.id);
           const status = statuses.find((s) => s.id === app.id);
           const cap = app.dailyLimitMinutes ?? 0;
-          const progress = cap ? Math.min(1, app.usedMinutesToday / cap) : 0;
+          const progress = cap ? Math.min(1, app.usedSecondsToday / (cap * 60)) : 0;
           const locked = Boolean(status?.locked);
           return (
             <Pressable key={app.id} style={styles.appRow} onPress={() => router.push(`/control/${app.id}`)}>
@@ -112,8 +112,9 @@ export default function Home() {
                 <Type variant="bodyStrong">{meta?.name}</Type>
                 <Type variant="caption">
                   {app.dailyLimitMinutes == null
-                    ? `${formatDuration(app.usedMinutesToday)} today · no cap`
-                    : `${formatDuration(app.usedMinutesToday)} of ${formatDuration(app.dailyLimitMinutes)}`}
+                    ? `${formatSeconds(app.usedSecondsToday)} today · no daily cap`
+                    : `${formatSeconds(app.usedSecondsToday)} of ${formatDuration(app.dailyLimitMinutes)}`}
+                  {app.sittingSeconds > 0 ? ` · ${formatSeconds(app.sittingSeconds)} this sitting` : ''}
                 </Type>
               </View>
               <View style={[styles.pill, locked && styles.pillLock]}>

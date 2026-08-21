@@ -22,7 +22,7 @@ export default function AppsTab() {
         Apps
       </Type>
       <Type style={styles.lede}>
-        Connect what you want locked. Each app keeps its own windows and daily cap. Universal hours still sit on top.
+        Connect what you want locked. Each app keeps its own windows, daily cap, and sitting cap. Universal hours still sit on top.
       </Type>
       <View style={{ gap: 8 }}>
         {CATALOG.map((meta) => {
@@ -68,7 +68,7 @@ export default function AppsTab() {
         })}
       </View>
       <Type variant="caption" style={{ marginTop: space.md }}>
-        Tap an unused app to connect it. Tap a connected one to set hours, caps, and try a session.
+        Tap an unused app to connect it. Tap a connected one to set hours and caps.
       </Type>
     </Screen>
   );

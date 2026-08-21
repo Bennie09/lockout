@@ -1,8 +1,8 @@
 import { colors, space } from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import { ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Platform, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   children: React.ReactNode;
@@ -13,8 +13,12 @@ type Props = {
 };
 
 export function Screen({ children, scroll, padded = true, style, extraBottom = 24 }: Props) {
+  const insets = useSafeAreaInsets();
+  const bottomInset = insets.bottom > 0 ? insets.bottom : Platform.OS === 'android' ? 34 : 0;
+  const padBottom = extraBottom + bottomInset;
+
   const body = (
-    <View style={[styles.inner, padded && styles.padded, { paddingBottom: extraBottom }, style]}>
+    <View style={[styles.inner, padded && styles.padded, { paddingBottom: padBottom }, style]}>
       {children}
     </View>
   );

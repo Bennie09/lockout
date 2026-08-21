@@ -55,6 +55,19 @@ export function untilStart(nowMinutes: number, start: string) {
   return 1440 - nowMinutes + startMin;
 }
 
+export function formatSeconds(totalSeconds: number) {
+  const s = Math.max(0, Math.round(totalSeconds));
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  if (m < 60) return rem ? `${m}m ${rem}s` : `${m}m`;
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+  if (mm === 0 && rem === 0) return `${h}h`;
+  if (rem === 0) return `${h}h ${mm}m`;
+  return `${h}h ${mm}m`;
+}
+
 export function formatDuration(minutes: number) {
   const abs = Math.max(0, Math.round(minutes));
   const h = Math.floor(abs / 60);

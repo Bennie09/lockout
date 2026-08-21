@@ -1,6 +1,7 @@
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
 import { Type } from '@/components/Type';
+import { UsageAccessGuide } from '@/components/UsageAccessGuide';
 import { colors, radius, space } from '@/constants/theme';
 import {
   guardAvailable,
@@ -8,7 +9,6 @@ import {
   hasUsageAccess,
   isIgnoringBatteryOptimizations,
   openOverlaySettings,
-  openUsageAccessSettings,
   requestIgnoreBatteryOptimizations,
 } from 'lockout-guard';
 import { useRouter } from 'expo-router';
@@ -82,13 +82,7 @@ export default function Access() {
         matters — without it, Lockout cannot see that Instagram is in front.
       </Type>
 
-      <PermRow
-        title="Usage access"
-        body="Required. Lets Lockout see which app is open, then send you home if that app is locked."
-        ok={perms.usage}
-        label={perms.usage ? 'Granted' : 'Open settings'}
-        onPress={openUsageAccessSettings}
-      />
+      <UsageAccessGuide granted={perms.usage} />
       <PermRow
         title="Display over other apps"
         body="Helps on some phones when Android blocks Lockout from jumping in front."
