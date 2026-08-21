@@ -5,19 +5,31 @@ import { Screen } from '@/components/Screen';
 import { Type } from '@/components/Type';
 import { catalogById } from '@/constants/catalog';
 import { colors, radius, space } from '@/constants/theme';
-import { peekPendingOnboarding, takePendingOnboarding } from '@/lib/pending';
+import { peekPendingOnboarding, takePendingOnboarding, type PendingOnboarding } from '@/lib/pending';
 import { useStore } from '@/store/StoreProvider';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 export default function Ready() {
   const router = useRouter();
   const { dispatch } = useStore();
-  const pending = peekPendingOnboarding();
+  const [pending, setPending] = useState<PendingOnboarding | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void peekPendingOnboarding().then((value) => {
+      if (!cancelled) setPending(value);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const apps = pending?.apps ?? [];
 
-  function enter() {
-    const payload = takePendingOnboarding() ?? pending;
+  async function enter() {
+    const payload = (await takePendingOnboarding()) ?? pending;
     if (!payload) {
       router.replace('/onboarding/welcome');
       return;
@@ -66,7 +78,7 @@ export default function Ready() {
         </Type>
       </View>
       <View style={{ flex: 1 }} />
-      <Button label="Enter Lockout" onPress={enter} />
+      <Button label="Enter Lockout" onPress={() => void enter()} />
     </Screen>
   );
 }

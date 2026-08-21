@@ -7,7 +7,7 @@ import { SecretEditor } from '@/components/SecretEditor';
 import { Type } from '@/components/Type';
 import { colors, radius, space } from '@/constants/theme';
 import { secretsMatch, wordMatch } from '@/lib/crypto';
-import type { SecretKind } from '@/lib/secrets';
+import { storedHash, type SecretKind } from '@/lib/secrets';
 import { useStore } from '@/store/StoreProvider';
 import * as Haptics from 'expo-haptics';
 import * as LocalAuthentication from 'expo-local-authentication';
@@ -95,7 +95,7 @@ export default function Challenge() {
   }, [hold, step?.kind]);
 
   useEffect(() => {
-    if (pin.length === 6) void checkPin();
+    if (pin.length === 6) void checkPin(pin);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pin]);
 
@@ -152,13 +152,21 @@ export default function Challenge() {
     }
   }
 
-  async function checkPin() {
-    const ok = await secretsMatch(pin, state.security.pinHash);
+  async function failSecret(kind: SecretKind, emptyCopy: string, wrongCopy: string) {
+    setFails((current) => ({ ...current, [kind]: current[kind] + 1 }));
+    setError(storedHash(kind, state.security) ? wrongCopy : emptyCopy);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+  }
+
+  async function checkPin(value: string) {
+    const ok = await secretsMatch(value, state.security.pinHash);
     if (!ok) {
-      setFails((current) => ({ ...current, pin: current.pin + 1 }));
-      setError('Wrong PIN. Sit with that.');
       setPin('');
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+      await failSecret(
+        'pin',
+        'No PIN is stored. Recover with fingerprint and set a new one.',
+        'That PIN does not match what Lockout stored. If you are sure this is it, recover below and set it again.',
+      );
       return;
     }
     setFails((current) => ({ ...current, pin: 0 }));
@@ -168,8 +176,11 @@ export default function Challenge() {
   async function checkPassword() {
     const ok = await secretsMatch(password, state.security.passwordHash);
     if (!ok) {
-      setFails((current) => ({ ...current, password: current.password + 1 }));
-      setError('Not that password.');
+      await failSecret(
+        'password',
+        'No password is stored. Recover with fingerprint and set a new one.',
+        'That password does not match what Lockout stored. If you are sure this is it, recover below and set it again.',
+      );
       return;
     }
     setFails((current) => ({ ...current, password: 0 }));
@@ -179,8 +190,11 @@ export default function Challenge() {
   async function checkWord() {
     const ok = await wordMatch(word, state.security.secretWordHash);
     if (!ok) {
-      setFails((current) => ({ ...current, word: current.word + 1 }));
-      setError('Not that word.');
+      await failSecret(
+        'word',
+        'No secret word is stored. Recover with fingerprint and set a new one.',
+        'That word does not match what Lockout stored. If you are sure this is it, recover below and set it again.',
+      );
       return;
     }
     setFails((current) => ({ ...current, word: 0 }));
@@ -315,11 +329,11 @@ export default function Challenge() {
         </Type>
       ) : null}
 
-      {gateKind && gateFails >= 3 ? (
+      {gateKind && gateFails >= 1 ? (
         <Pressable onPress={() => setRecover(gateKind)} style={{ marginTop: 16 }}>
           <Type variant="caption" color={colors.brass}>
-            Forgotten? Recover with fingerprint or another secret, then set a new{' '}
-            {gateKind === 'word' ? 'word' : gateKind}.
+            This gate is not matching. Recover with fingerprint, then set a new{' '}
+            {gateKind === 'word' ? 'word' : gateKind}. Password and secret word can break the same way.
           </Type>
         </Pressable>
       ) : null}

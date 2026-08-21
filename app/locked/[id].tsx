@@ -4,6 +4,7 @@ import { Screen } from '@/components/Screen';
 import { Type } from '@/components/Type';
 import { catalogById } from '@/constants/catalog';
 import { colors, radius, space } from '@/constants/theme';
+import { lockScreenHasCustom, lockScreenLine } from '@/lib/lockCopy';
 import { reasonCopy, statusForApp } from '@/lib/lockout';
 import { useClock } from '@/lib/useClock';
 import { useStore } from '@/store/StoreProvider';
@@ -19,16 +20,18 @@ export default function Locked() {
   const app = state.apps.find((item) => item.id === id);
   const meta = catalogById(id ?? '');
   const status = app ? statusForApp(state, app, now) : null;
+  const line = lockScreenLine(state, app, meta?.name);
+  const custom = lockScreenHasCustom(state, app);
 
   useEffect(() => {
     dispatch({
       type: 'LOG',
       title: `Locked out of ${meta?.name ?? 'app'}`,
-      detail: 'The door stayed shut.',
+      detail: line,
       tone: 'lock',
     });
     dispatch({ type: 'ADD_SAVED', minutes: 3 });
-  }, [dispatch, meta?.name]);
+  }, [dispatch, meta?.name, line]);
 
   return (
     <Screen extraBottom={32}>
@@ -37,14 +40,18 @@ export default function Locked() {
           <LockMark size={48} color={colors.terracotta} />
         </View>
         <Type variant="caption" color={colors.terracotta}>
-          LOCKED OUT
+          LOCKED OUT{meta?.name ? ` · ${meta.name.toUpperCase()}` : ''}
         </Type>
-        <Type variant="display" style={styles.title}>
-          {meta?.name ?? 'This app'} stays closed.
+        <Type variant={custom ? 'displayItalic' : 'display'} style={styles.title}>
+          {line}
         </Type>
-        <Type style={{ textAlign: 'center' }}>
-          You are inside a lockout. Opening it from here — or from the home screen — should feel like hitting a wall.
-        </Type>
+        {custom ? (
+          <Type style={{ textAlign: 'center' }}>{meta?.name ?? 'This app'} stays closed. That line is yours.</Type>
+        ) : (
+          <Type style={{ textAlign: 'center' }}>
+            You are inside a lockout. Opening it from here — or from the home screen — should feel like hitting a wall.
+          </Type>
+        )}
         <View style={styles.reasons}>
           {(status?.reasons ?? []).map((reason, i) => (
             <Type key={i} variant="caption" style={styles.reason}>

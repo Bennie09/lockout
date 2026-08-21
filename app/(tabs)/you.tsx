@@ -1,5 +1,6 @@
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { LockCopyEditor } from '@/components/LockCopyEditor';
 import { LockMark } from '@/components/LockMark';
 import { Screen } from '@/components/Screen';
 import { Type } from '@/components/Type';
@@ -13,7 +14,7 @@ import {
   openOverlaySettings,
   requestIgnoreBatteryOptimizations,
 } from 'lockout-guard';
-import { SECRET_COPY, type SecretKind } from '@/lib/secrets';
+import { SECRET_COPY, wipeAuthMaterial, type SecretKind } from '@/lib/secrets';
 import { useStore } from '@/store/StoreProvider';
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
@@ -63,8 +64,8 @@ export default function YouTab() {
         <View style={styles.cardPad}>
           <Type variant="bodyStrong">Security gates</Type>
           <Type variant="caption" style={{ marginTop: 4 }}>
-            Fingerprint {state.security.biometricsEnabled ? 'on' : 'off'} · change a secret anytime. Forgotten ones need
-            another gate, not a wipe.
+            Fingerprint {state.security.biometricsEnabled ? 'on' : 'off'} · if a PIN, password, or word never matches,
+            recover with fingerprint and set it again. Do not wipe the app for that.
           </Type>
         </View>
         {(['pin', 'password', 'word'] as SecretKind[]).map((kind) => (
@@ -91,11 +92,23 @@ export default function YouTab() {
       </Card>
 
       <Card style={{ marginTop: 12 }}>
-        <Type variant="bodyStrong">Preview a lockout</Type>
+        <Type variant="bodyStrong">Lock screen</Type>
         <Type variant="caption" style={{ marginTop: 4, marginBottom: 12 }}>
-          See the screen you get when an app is inside a window, over its daily cap, or in a sitting cool-down.
+          When Instagram (or any connected app) gets closed, this is what you tell yourself. Per-app lines on each
+          control screen override this.
         </Type>
-        <Button label="Show locked-out screen" variant="ghost" onPress={() => router.push(`/locked/${first}`)} />
+        <LockCopyEditor
+          value={state.lockMessage}
+          onChange={(message) => dispatch({ type: 'SET_LOCK_MESSAGE', target: 'universal', message })}
+          placeholder="Go walk."
+          hint="A short order to yourself. Not a quote. A next action."
+        />
+        <Button
+          label="Show locked-out screen"
+          variant="ghost"
+          style={{ marginTop: 12 }}
+          onPress={() => router.push(`/locked/${first}`)}
+        />
       </Card>
 
       <Card style={{ marginTop: 12 }}>
@@ -148,7 +161,7 @@ export default function YouTab() {
             router.push({ pathname: '/challenge', params: { next: '/reset', target: 'universal' } });
             return;
           }
-          dispatch({ type: 'RESET' });
+          void wipeAuthMaterial().then(() => dispatch({ type: 'RESET' }));
         }}
       />
       <Type variant="caption" style={{ marginTop: 8, textAlign: 'center' }}>

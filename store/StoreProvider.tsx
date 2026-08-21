@@ -24,6 +24,7 @@ type Action =
   | { type: 'TOGGLE_WINDOW'; target: 'universal' | string; windowId: string }
   | { type: 'SET_UNIVERSAL'; enabled: boolean }
   | { type: 'SET_FAST'; enabled: boolean }
+  | { type: 'SET_LOCK_MESSAGE'; target: 'universal' | string; message: string }
   | { type: 'SET_SECURITY'; security: Partial<Security> }
   | { type: 'LOG'; title: string; detail: string; tone: 'lock' | 'ok' | 'warn' }
   | { type: 'ADD_SAVED'; minutes: number }
@@ -152,6 +153,11 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, universalEnabled: action.enabled };
     case 'SET_FAST':
       return { ...state, fastUsage: action.enabled };
+    case 'SET_LOCK_MESSAGE':
+      if (action.target === 'universal') {
+        return { ...state, lockMessage: action.message };
+      }
+      return withApp(state, action.target, (app) => ({ ...app, lockMessage: action.message }));
     case 'SET_SECURITY':
       return { ...state, security: { ...state.security, ...action.security } };
     case 'LOG':

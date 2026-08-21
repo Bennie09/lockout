@@ -1,6 +1,7 @@
 import { AppBadge } from '@/components/AppBadge';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { LockCopyEditor } from '@/components/LockCopyEditor';
 import { Screen } from '@/components/Screen';
 import { SectionHeader } from '@/components/SectionHeader';
 import { Type } from '@/components/Type';
@@ -100,6 +101,14 @@ export default function Control() {
           />
         ) : null}
       </Card>
+
+      <SectionHeader title="Lock screen" aside={app.lockMessage.trim() ? 'this app' : 'default'} />
+      <LockCopyEditor
+        value={app.lockMessage}
+        onChange={(message) => dispatch({ type: 'SET_LOCK_MESSAGE', target: app.id, message })}
+        placeholder="Go walk."
+        hint="Shown when this app is kicked closed. Blank uses the line from You."
+      />
 
       <SectionHeader title="Daily cap" aside={formatSeconds(app.usedSecondsToday) + ' used'} />
       <View style={styles.chips}>

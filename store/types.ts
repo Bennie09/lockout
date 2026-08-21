@@ -20,6 +20,7 @@ export type ConnectedApp = {
   usedSecondsToday: number;
   sittingSeconds: number;
   windows: LockoutWindow[];
+  lockMessage: string;
 };
 
 export type Security = {
@@ -49,6 +50,7 @@ export type AppState = {
   minutesSaved: number;
   lastResetDate: string;
   lastActiveDate: string;
+  lockMessage: string;
 };
 
 export type LockReason =

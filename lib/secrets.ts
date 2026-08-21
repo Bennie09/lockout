@@ -1,4 +1,5 @@
-import { hashSecret, secretsMatch, wordMatch } from '@/lib/crypto';
+import { clearLegacySalt, hashSecret, secretsMatch, wordMatch } from '@/lib/crypto';
+import { clearPendingOnboarding } from '@/lib/pending';
 import type { Security } from '@/store/types';
 
 export type SecretKind = 'pin' | 'password' | 'word';
@@ -46,4 +47,12 @@ export function hashKey(kind: SecretKind): keyof Pick<Security, 'pinHash' | 'pas
   if (kind === 'pin') return 'pinHash';
   if (kind === 'password') return 'passwordHash';
   return 'secretWordHash';
+}
+
+export function storedHash(kind: SecretKind, security: Security) {
+  return security[hashKey(kind)];
+}
+
+export async function wipeAuthMaterial() {
+  await Promise.all([clearLegacySalt(), clearPendingOnboarding()]);
 }

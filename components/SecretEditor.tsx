@@ -72,7 +72,7 @@ export function SecretEditor({
       setValue('');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
       if (nextFails >= FAIL_LIMIT && phase === 'current') {
-        setError('That is not it. Recover with another gate.');
+        setError('That is not matching what Lockout stored. Recover with fingerprint.');
         setPhase('pick');
         setFails(0);
         return;
@@ -229,10 +229,10 @@ export function SecretEditor({
         />
       )}
 
-      {phase === 'current' && fails >= 2 ? (
+      {phase === 'current' && fails >= 1 ? (
         <Pressable onPress={() => { resetEntry(); setPhase('pick'); }} style={{ marginTop: 8 }}>
           <Type variant="caption" color={colors.brass}>
-            Forgotten? Recover with another gate.
+            This is not matching what Lockout stored. Recover with fingerprint and set a new {copy.noun}.
           </Type>
         </Pressable>
       ) : null}

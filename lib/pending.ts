@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import type { Security } from '@/store/types';
 
 export type PendingOnboarding = {
@@ -6,18 +8,34 @@ export type PendingOnboarding = {
   security: Security;
 };
 
-let pending: PendingOnboarding | null = null;
+const PENDING_KEY = 'lockout.pending.v1';
 
-export function setPendingOnboarding(next: PendingOnboarding) {
-  pending = next;
+let memory: PendingOnboarding | null | undefined;
+
+export async function setPendingOnboarding(next: PendingOnboarding) {
+  memory = next;
+  await AsyncStorage.setItem(PENDING_KEY, JSON.stringify(next));
 }
 
-export function takePendingOnboarding() {
-  const value = pending;
-  pending = null;
+export async function peekPendingOnboarding() {
+  if (memory !== undefined) return memory;
+  try {
+    const raw = await AsyncStorage.getItem(PENDING_KEY);
+    memory = raw ? (JSON.parse(raw) as PendingOnboarding) : null;
+  } catch {
+    memory = null;
+  }
+  return memory;
+}
+
+export async function takePendingOnboarding() {
+  const value = await peekPendingOnboarding();
+  memory = null;
+  await AsyncStorage.removeItem(PENDING_KEY);
   return value;
 }
 
-export function peekPendingOnboarding() {
-  return pending;
+export async function clearPendingOnboarding() {
+  memory = null;
+  await AsyncStorage.removeItem(PENDING_KEY);
 }

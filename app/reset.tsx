@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { wipeAuthMaterial } from '@/lib/secrets';
 import { useStore } from '@/store/StoreProvider';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
@@ -9,9 +10,10 @@ export default function Reset() {
   const router = useRouter();
 
   useEffect(() => {
-    dispatch({ type: 'RESET' });
-    const t = setTimeout(() => router.replace('/onboarding/welcome'), 80);
-    return () => clearTimeout(t);
+    void wipeAuthMaterial().then(() => {
+      dispatch({ type: 'RESET' });
+      router.replace('/onboarding/welcome');
+    });
   }, [dispatch, router]);
 
   return (

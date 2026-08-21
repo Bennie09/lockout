@@ -12,6 +12,7 @@ export function normalizeApp(app: Partial<ConnectedApp> & { id: string }): Conne
     cooldownUntil: app.cooldownUntil ?? 0,
     usedSecondsToday: app.usedSecondsToday ?? (app.usedMinutesToday ?? 0) * 60,
     sittingSeconds: app.sittingSeconds ?? 0,
+    lockMessage: app.lockMessage ?? '',
   };
 }
 
@@ -27,6 +28,7 @@ export function emptyApp(id: string): ConnectedApp {
     usedMinutesToday: 0,
     usedSecondsToday: 0,
     sittingSeconds: 0,
+    lockMessage: '',
   };
 }
 
@@ -48,6 +50,7 @@ export function createInitialState(): AppState {
     minutesSaved: 0,
     lastResetDate: todayKey(),
     lastActiveDate: todayKey(),
+    lockMessage: '',
   };
 }
 

@@ -106,7 +106,7 @@ export default function Security() {
         hashSecret(password),
         hashSecret(word.trim().toLowerCase()),
       ]);
-      setPendingOnboarding({
+      await setPendingOnboarding({
         apps: (params.apps ?? '').split(',').filter(Boolean),
         night: params.night === '1',
         security: {
