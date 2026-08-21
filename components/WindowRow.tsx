@@ -1,4 +1,4 @@
-import { colors, fonts, radius } from '@/constants/theme';
+import { colors, fonts, radius, space } from '@/constants/theme';
 import { formatTime } from '@/lib/time';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
@@ -53,13 +53,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    paddingHorizontal: 4,
+    paddingHorizontal: space.md,
     gap: 12,
   },
   active: {
     backgroundColor: 'rgba(201, 163, 106, 0.08)',
-    borderRadius: radius.md,
-    paddingHorizontal: 10,
   },
   times: { flex: 1 },
   range: {

@@ -3,9 +3,11 @@ import { Field } from '@/components/Field';
 import { LockMark } from '@/components/LockMark';
 import { PinPad } from '@/components/PinPad';
 import { Screen } from '@/components/Screen';
+import { SecretEditor } from '@/components/SecretEditor';
 import { Type } from '@/components/Type';
 import { colors, radius, space } from '@/constants/theme';
 import { secretsMatch, wordMatch } from '@/lib/crypto';
+import type { SecretKind } from '@/lib/secrets';
 import { useStore } from '@/store/StoreProvider';
 import * as Haptics from 'expo-haptics';
 import * as LocalAuthentication from 'expo-local-authentication';
@@ -73,6 +75,8 @@ export default function Challenge() {
   const [bioOk, setBioOk] = useState(false);
   const [holding, setHolding] = useState(false);
   const [hold, setHold] = useState(0);
+  const [fails, setFails] = useState({ pin: 0, password: 0, word: 0 });
+  const [recover, setRecover] = useState<SecretKind | null>(null);
 
   useEffect(() => {
     if (!holding) {
@@ -151,23 +155,35 @@ export default function Challenge() {
   async function checkPin() {
     const ok = await secretsMatch(pin, state.security.pinHash);
     if (!ok) {
+      setFails((current) => ({ ...current, pin: current.pin + 1 }));
       setError('Wrong PIN. Sit with that.');
       setPin('');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
       return;
     }
+    setFails((current) => ({ ...current, pin: 0 }));
     advance();
   }
 
   async function checkPassword() {
     const ok = await secretsMatch(password, state.security.passwordHash);
-    if (!ok) return setError('Not that password.');
+    if (!ok) {
+      setFails((current) => ({ ...current, password: current.password + 1 }));
+      setError('Not that password.');
+      return;
+    }
+    setFails((current) => ({ ...current, password: 0 }));
     advance();
   }
 
   async function checkWord() {
     const ok = await wordMatch(word, state.security.secretWordHash);
-    if (!ok) return setError('Not that word.');
+    if (!ok) {
+      setFails((current) => ({ ...current, word: current.word + 1 }));
+      setError('Not that word.');
+      return;
+    }
+    setFails((current) => ({ ...current, word: 0 }));
     advance();
   }
 
@@ -175,6 +191,25 @@ export default function Challenge() {
   const gatesTotal = steps.filter((s) => ['bio', 'pin', 'password', 'word', 'why'].includes(s.kind)).length;
 
   if (!step) return null;
+
+  if (recover) {
+    return (
+      <Screen scroll extraBottom={36}>
+        <SecretEditor
+          target={recover}
+          allowCurrent={false}
+          onSaved={() => {
+            setRecover(null);
+            advance();
+          }}
+          onCancel={() => setRecover(null)}
+        />
+      </Screen>
+    );
+  }
+
+  const gateKind = step.kind === 'pin' || step.kind === 'password' || step.kind === 'word' ? step.kind : null;
+  const gateFails = gateKind ? fails[gateKind] : 0;
 
   const pinReady = step.kind !== 'pin' || waitLeft <= 0;
   const sitReady = step.kind !== 'sit' || waitLeft <= 0;
@@ -278,6 +313,15 @@ export default function Challenge() {
         <Type color={colors.terracotta} style={{ marginTop: 12 }}>
           {error}
         </Type>
+      ) : null}
+
+      {gateKind && gateFails >= 3 ? (
+        <Pressable onPress={() => setRecover(gateKind)} style={{ marginTop: 16 }}>
+          <Type variant="caption" color={colors.brass}>
+            Forgotten? Recover with fingerprint or another secret, then set a new{' '}
+            {gateKind === 'word' ? 'word' : gateKind}.
+          </Type>
+        </Pressable>
       ) : null}
 
       {step.kind === 'pause' ? (

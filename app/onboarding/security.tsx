@@ -28,37 +28,37 @@ export default function Security() {
 
   const copy: Record<Step, { kicker: string; title: string; body: string }> = {
     pin: {
-      kicker: 'Step 2 of 3 · Gate 1',
+      kicker: 'Step 2 of 4 · Gate 1',
       title: 'A six-digit PIN.',
       body: 'Not four. Six. This is the first thing Lockout will ask if you try to cheat a lockout.',
     },
     pin2: {
-      kicker: 'Step 2 of 3 · Gate 1',
+      kicker: 'Step 2 of 4 · Gate 1',
       title: 'Again, so it sticks.',
       body: 'If you forget this later, you will have to sit through the other gates anyway.',
     },
     password: {
-      kicker: 'Step 2 of 3 · Gate 2',
+      kicker: 'Step 2 of 4 · Gate 2',
       title: 'A real password.',
       body: 'At least 8 characters. Something you will not type on autopilot.',
     },
     password2: {
-      kicker: 'Step 2 of 3 · Gate 2',
+      kicker: 'Step 2 of 4 · Gate 2',
       title: 'Confirm the password.',
       body: 'Same one. No paste-and-forget.',
     },
     word: {
-      kicker: 'Step 2 of 3 · Gate 3',
+      kicker: 'Step 2 of 4 · Gate 3',
       title: 'A secret word.',
       body: 'One word you will remember. A street. A dog. A kitchen tile. Not “password”.',
     },
     word2: {
-      kicker: 'Step 2 of 3 · Gate 3',
+      kicker: 'Step 2 of 4 · Gate 3',
       title: 'Type the word again.',
       body: 'Lowercase, uppercase — we ignore that. Spelling, we do not.',
     },
     bio: {
-      kicker: 'Step 2 of 3 · Gate 4',
+      kicker: 'Step 2 of 4 · Gate 4',
       title: 'Fingerprint or face.',
       body: 'If this device supports it, Lockout will ask for it first. On an emulator you can long-press instead.',
     },
@@ -116,7 +116,7 @@ export default function Security() {
           biometricsEnabled,
         },
       });
-      router.push('/onboarding/ready');
+      router.push('/onboarding/access');
     } finally {
       setBusy(false);
     }

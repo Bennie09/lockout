@@ -1,8 +1,13 @@
 import { colors } from '@/constants/theme';
 import { Tabs } from 'expo-router';
 import { Clock3, Grid2x2, House, User } from 'lucide-react-native';
+import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+  const bottom = insets.bottom || (Platform.OS === 'android' ? 34 : 0);
+
   return (
     <Tabs
       screenOptions={{
@@ -13,13 +18,13 @@ export default function TabLayout() {
           backgroundColor: colors.bgElevated,
           borderTopColor: colors.line,
           borderTopWidth: 1,
-          height: 68,
-          paddingTop: 8,
+          height: 56 + bottom,
+          paddingTop: 6,
+          paddingBottom: bottom,
         },
         tabBarLabelStyle: {
           fontFamily: 'Outfit_500Medium',
           fontSize: 11,
-          marginBottom: 8,
         },
       }}>
       <Tabs.Screen

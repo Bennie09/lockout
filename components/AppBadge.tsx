@@ -1,16 +1,16 @@
 import { BRAND_PATHS, type BrandId } from '@/constants/brandPaths';
 import { catalogById } from '@/constants/catalog';
 import { fonts, radius } from '@/constants/theme';
+import { TikTokMark } from '@/components/TikTokMark';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 const TILE: Record<
   string,
-  { kind: 'solid' | 'instagram' | 'tiktok'; bg: string; glyph: string; scale: number; border?: string }
+  { kind: 'solid' | 'instagram'; bg: string; glyph: string; scale: number; border?: string }
 > = {
   instagram: { kind: 'instagram', bg: '#E1306C', glyph: '#FFFFFF', scale: 0.56 },
-  tiktok: { kind: 'tiktok', bg: '#111111', glyph: '#FFFFFF', scale: 0.56, border: 'rgba(255,255,255,0.12)' },
   youtube: { kind: 'solid', bg: '#FF0000', glyph: '#FFFFFF', scale: 0.62 },
   x: { kind: 'solid', bg: '#0A0A0A', glyph: '#FFFFFF', scale: 0.5, border: 'rgba(255,255,255,0.14)' },
   snapchat: { kind: 'solid', bg: '#FFFC00', glyph: '#0A0A0A', scale: 0.62 },
@@ -35,6 +35,23 @@ export function AppBadge({ id, size = 44 }: { id: string; size?: number }) {
   const path = BRAND_PATHS[id as BrandId];
   const radiusPx = Math.max(radius.sm, size * 0.28);
   const glyphSize = size * (tile?.scale ?? 0.56);
+
+  if (id === 'tiktok') {
+    return (
+      <View
+        style={{
+          width: size,
+          height: size,
+          borderRadius: radiusPx,
+          backgroundColor: '#FFFFFF',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+        }}>
+        <TikTokMark size={size * 0.78} />
+      </View>
+    );
+  }
 
   if (!path || !tile) {
     const letter = (app?.name ?? id).slice(0, 1).toUpperCase();
@@ -69,23 +86,6 @@ export function AppBadge({ id, size = 44 }: { id: string; size?: number }) {
         style={frame}>
         <Glyph d={path} color={tile.glyph} size={glyphSize} />
       </LinearGradient>
-    );
-  }
-
-  if (tile.kind === 'tiktok') {
-    const shift = Math.max(1, size * 0.045);
-    return (
-      <View style={[frame, { backgroundColor: tile.bg }]}>
-        <View style={{ width: glyphSize, height: glyphSize }}>
-          <View style={[StyleSheet.absoluteFill, { transform: [{ translateX: -shift }, { translateY: shift }] }]}>
-            <Glyph d={path} color="#25F4EE" size={glyphSize} />
-          </View>
-          <View style={[StyleSheet.absoluteFill, { transform: [{ translateX: shift }, { translateY: -shift }] }]}>
-            <Glyph d={path} color="#FE2C55" size={glyphSize} />
-          </View>
-          <Glyph d={path} color="#FFFFFF" size={glyphSize} />
-        </View>
-      </View>
     );
   }
 

@@ -4,7 +4,7 @@ export type CatalogApp = {
   tagline: string;
   color: string;
   onColor: string;
-  androidPackage: string;
+  androidPackages: string[];
 };
 
 export const CATALOG: CatalogApp[] = [
@@ -14,15 +14,15 @@ export const CATALOG: CatalogApp[] = [
     tagline: 'Reels, stories, the scroll',
     color: '#E1306C',
     onColor: '#F3EDE3',
-    androidPackage: 'com.instagram.android',
+    androidPackages: ['com.instagram.android'],
   },
   {
     id: 'tiktok',
     name: 'TikTok',
     tagline: 'For You, forever',
-    color: '#111111',
+    color: '#FE2C55',
     onColor: '#F3EDE3',
-    androidPackage: 'com.zhiliaoapp.musically',
+    androidPackages: ['com.zhiliaoapp.musically', 'com.ss.android.ugc.trill'],
   },
   {
     id: 'youtube',
@@ -30,7 +30,7 @@ export const CATALOG: CatalogApp[] = [
     tagline: 'Videos and Shorts',
     color: '#FF0000',
     onColor: '#F3EDE3',
-    androidPackage: 'com.google.android.youtube',
+    androidPackages: ['com.google.android.youtube'],
   },
   {
     id: 'x',
@@ -38,7 +38,7 @@ export const CATALOG: CatalogApp[] = [
     tagline: 'Timeline and replies',
     color: '#0A0A0A',
     onColor: '#F3EDE3',
-    androidPackage: 'com.twitter.android',
+    androidPackages: ['com.twitter.android'],
   },
   {
     id: 'snapchat',
@@ -46,7 +46,7 @@ export const CATALOG: CatalogApp[] = [
     tagline: 'Snaps and stories',
     color: '#FFFC00',
     onColor: '#0C0B0A',
-    androidPackage: 'com.snapchat.android',
+    androidPackages: ['com.snapchat.android'],
   },
   {
     id: 'facebook',
@@ -54,7 +54,7 @@ export const CATALOG: CatalogApp[] = [
     tagline: 'Feed, groups, reels',
     color: '#1877F2',
     onColor: '#F3EDE3',
-    androidPackage: 'com.facebook.katana',
+    androidPackages: ['com.facebook.katana', 'com.facebook.lite'],
   },
   {
     id: 'reddit',
@@ -62,7 +62,7 @@ export const CATALOG: CatalogApp[] = [
     tagline: 'Threads without end',
     color: '#FF4500',
     onColor: '#0C0B0A',
-    androidPackage: 'com.reddit.frontpage',
+    androidPackages: ['com.reddit.frontpage'],
   },
   {
     id: 'whatsapp',
@@ -70,7 +70,7 @@ export const CATALOG: CatalogApp[] = [
     tagline: 'Chats and status',
     color: '#25D366',
     onColor: '#0C0B0A',
-    androidPackage: 'com.whatsapp',
+    androidPackages: ['com.whatsapp', 'com.whatsapp.w4b'],
   },
   {
     id: 'discord',
@@ -78,7 +78,7 @@ export const CATALOG: CatalogApp[] = [
     tagline: 'Servers and DMs',
     color: '#5865F2',
     onColor: '#F3EDE3',
-    androidPackage: 'com.discord',
+    androidPackages: ['com.discord'],
   },
   {
     id: 'pinterest',
@@ -86,10 +86,16 @@ export const CATALOG: CatalogApp[] = [
     tagline: 'Pins and boards',
     color: '#E60023',
     onColor: '#F3EDE3',
-    androidPackage: 'com.pinterest',
+    androidPackages: ['com.pinterest'],
   },
 ];
 
 export function catalogById(id: string) {
   return CATALOG.find((app) => app.id === id);
 }
+
+export function packagesFor(id: string) {
+  return catalogById(id)?.androidPackages ?? [];
+}
+
+export const ALL_ANDROID_PACKAGES = CATALOG.flatMap((app) => app.androidPackages);

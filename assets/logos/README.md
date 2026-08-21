@@ -1,3 +1,3 @@
-Brand marks in this folder are from [Simple Icons](https://simpleicons.org) (CC0).
+Brand marks in this folder are from [Simple Icons](https://simpleicons.org) (CC0), except TikTok.
 
-They are the official-shape SVG glyphs for Instagram, TikTok, YouTube, X, Snapchat, Facebook, Reddit, WhatsApp, Discord, and Pinterest. The app renders them as rounded tiles in each brand’s colors.
+TikTok is the sketch-icons mark (MIT) from [Garuda Technology](https://github.com/garudatechnologydevelopers/sketch-icons): cyan, black, and red note on a white tile.

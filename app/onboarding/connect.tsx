@@ -4,15 +4,24 @@ import { Screen } from '@/components/Screen';
 import { Type } from '@/components/Type';
 import { CATALOG } from '@/constants/catalog';
 import { colors, radius, space } from '@/constants/theme';
+import { guardAvailable, isAppInstalled } from 'lockout-guard';
 import { useRouter } from 'expo-router';
 import { Check } from 'lucide-react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
 export default function Connect() {
   const router = useRouter();
   const [picked, setPicked] = useState<string[]>(['instagram', 'tiktok', 'youtube']);
   const [night, setNight] = useState(true);
+  const installed = useMemo(() => {
+    const map: Record<string, boolean> = {};
+    if (!guardAvailable) return map;
+    for (const app of CATALOG) {
+      map[app.id] = app.androidPackages.some((pkg) => isAppInstalled(pkg));
+    }
+    return map;
+  }, []);
 
   function toggle(id: string) {
     setPicked((current) =>
@@ -23,13 +32,13 @@ export default function Connect() {
   return (
     <Screen scroll extraBottom={40}>
       <Type variant="caption" color={colors.brass}>
-        Step 1 of 3
+        Step 1 of 4
       </Type>
       <Type variant="display" style={styles.title}>
         Connect the apps you keep opening.
       </Type>
       <Type style={styles.lede}>
-        Pick the ones that deserve a lock. You can add more later. Each one gets its own hours and daily cap.
+        Pick the ones that deserve a lock. This does not log you into Instagram — it names the app on this phone so Lockout can close it. You can add more later.
       </Type>
       <View style={styles.list}>
         {CATALOG.map((app) => {
@@ -39,7 +48,13 @@ export default function Connect() {
               <AppBadge id={app.id} />
               <View style={{ flex: 1 }}>
                 <Type variant="bodyStrong">{app.name}</Type>
-                <Type variant="caption">{app.tagline}</Type>
+                <Type variant="caption">
+                  {guardAvailable
+                    ? installed[app.id]
+                      ? `${app.tagline} · on this phone`
+                      : `${app.tagline} · not installed`
+                    : app.tagline}
+                </Type>
               </View>
               <View style={[styles.check, on && styles.checkOn]}>
                 {on ? <Check size={14} color={colors.bg} strokeWidth={2.4} /> : null}

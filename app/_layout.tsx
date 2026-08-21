@@ -1,5 +1,6 @@
 import { Fraunces_500Medium_Italic, Fraunces_700Bold } from '@expo-google-fonts/fraunces';
 import { Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold, Outfit_700Bold } from '@expo-google-fonts/outfit';
+import { GuardSync } from '@/components/GuardSync';
 import { colors } from '@/constants/theme';
 import { StoreProvider, useStore } from '@/store/StoreProvider';
 import { useFonts } from 'expo-font';
@@ -66,6 +67,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
       <StoreProvider>
         <Gate>
+          <GuardSync />
           <Stack
             screenOptions={{
               headerShown: false,
@@ -76,6 +78,7 @@ export default function RootLayout() {
             <Stack.Screen name="onboarding" />
             <Stack.Screen name="challenge" options={{ animation: 'slide_from_bottom', gestureEnabled: false }} />
             <Stack.Screen name="window-editor" options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
+            <Stack.Screen name="security-edit" options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
           </Stack>
         </Gate>
       </StoreProvider>

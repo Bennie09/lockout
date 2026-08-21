@@ -22,6 +22,7 @@
     "expo-symbols": "~57.0.2",
     "expo-system-ui": "~57.0.2",
     "expo-web-browser": "~57.0.2",
+    "lockout-guard": "file:modules/lockout-guard",
     "lucide-react-native": "^1.33.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -40,8 +41,9 @@
   },
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "apk": "scripts/build-apk.sh",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit"
   },

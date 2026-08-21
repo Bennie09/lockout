@@ -5,6 +5,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "lockout-guard": [
+        "./modules/lockout-guard/src/index.ts"
       ]
     }
   },

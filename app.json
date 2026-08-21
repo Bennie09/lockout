@@ -7,6 +7,10 @@
     "icon": "./assets/images/icon.png",
     "scheme": "lockout",
     "userInterfaceStyle": "dark",
+    "androidNavigationBar": {
+      "backgroundColor": "#141210",
+      "barStyle": "light-content"
+    },
     "ios": {
       "supportsTablet": false,
       "infoPlist": {
@@ -15,6 +19,18 @@
     },
     "android": {
       "package": "app.lockout.mobile",
+      "permissions": [
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.PACKAGE_USAGE_STATS",
+        "android.permission.WAKE_LOCK",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.VIBRATE"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#0C0B0A",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -31,6 +47,7 @@
     },
     "plugins": [
       "expo-router",
+      "./plugins/withLockoutAndroid.js",
       [
         "expo-splash-screen",
         {
