@@ -5,34 +5,28 @@ import { Screen } from '@/components/Screen';
 import { Type } from '@/components/Type';
 import { catalogById } from '@/constants/catalog';
 import { colors, radius, space } from '@/constants/theme';
+import { peekPendingOnboarding, takePendingOnboarding } from '@/lib/pending';
 import { useStore } from '@/store/StoreProvider';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 export default function Ready() {
   const router = useRouter();
   const { dispatch } = useStore();
-  const params = useLocalSearchParams<{
-    apps?: string;
-    night?: string;
-    pinHash?: string;
-    passwordHash?: string;
-    secretWordHash?: string;
-    bio?: string;
-  }>();
-  const apps = (params.apps ?? '').split(',').filter(Boolean);
+  const pending = peekPendingOnboarding();
+  const apps = pending?.apps ?? [];
 
   function enter() {
+    const payload = takePendingOnboarding() ?? pending;
+    if (!payload) {
+      router.replace('/onboarding/welcome');
+      return;
+    }
     dispatch({
       type: 'COMPLETE_ONBOARDING',
-      apps,
-      night: params.night === '1',
-      security: {
-        pinHash: String(params.pinHash ?? ''),
-        passwordHash: String(params.passwordHash ?? ''),
-        secretWordHash: String(params.secretWordHash ?? ''),
-        biometricsEnabled: params.bio === '1',
-      },
+      apps: payload.apps,
+      night: payload.night,
+      security: payload.security,
     });
     router.replace('/(tabs)');
   }
@@ -59,9 +53,9 @@ export default function Ready() {
           ))}
         </View>
         <View style={styles.hr} />
-        <Type variant="bodyStrong">{params.night === '1' ? 'Night lockout is on' : 'No night lockout yet'}</Type>
+        <Type variant="bodyStrong">{pending?.night ? 'Night lockout is on' : 'No night lockout yet'}</Type>
         <Type variant="caption" style={{ marginTop: 4 }}>
-          {params.night === '1'
+          {pending?.night
             ? '12:00 AM – 7:00 AM, every connected app. Add lunch, evenings, or per-app hours from Home.'
             : 'Add windows anytime from Hours. Universal and per-app both work.'}
         </Type>

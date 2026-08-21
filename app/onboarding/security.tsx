@@ -5,6 +5,7 @@ import { Screen } from '@/components/Screen';
 import { Type } from '@/components/Type';
 import { colors, radius, space } from '@/constants/theme';
 import { hashSecret } from '@/lib/crypto';
+import { setPendingOnboarding } from '@/lib/pending';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useState } from 'react';
@@ -105,17 +106,17 @@ export default function Security() {
         hashSecret(password),
         hashSecret(word.trim().toLowerCase()),
       ]);
-      router.push({
-        pathname: '/onboarding/ready',
-        params: {
-          apps: params.apps ?? '',
-          night: params.night ?? '1',
+      setPendingOnboarding({
+        apps: (params.apps ?? '').split(',').filter(Boolean),
+        night: params.night === '1',
+        security: {
           pinHash,
           passwordHash,
           secretWordHash,
-          bio: biometricsEnabled ? '1' : '0',
+          biometricsEnabled,
         },
       });
+      router.push('/onboarding/ready');
     } finally {
       setBusy(false);
     }

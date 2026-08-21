@@ -70,7 +70,7 @@ export default function Session() {
   const ss = (elapsed % 60).toString().padStart(2, '0');
 
   return (
-    <Screen extraBottom={24}>
+    <Screen scroll extraBottom={24}>
       <View style={styles.top}>
         <AppBadge id={app.id} size={36} />
         <View style={{ flex: 1 }}>
@@ -85,8 +85,8 @@ export default function Session() {
         </Type>
       </View>
       <View style={styles.feed}>
-        {FEED.map((line, i) => (
-          <View key={line} style={[styles.card, { opacity: Math.max(0.45, 1 - i * 0.07) }]}>
+        {FEED.slice(0, 5).map((line, i) => (
+          <View key={line} style={[styles.card, { opacity: Math.max(0.55, 1 - i * 0.08) }]}>
             <View style={[styles.swatch, { backgroundColor: meta.color }]} />
             <Type variant="bodyStrong">{line}</Type>
             <Type variant="caption">You would still be here. That is the point.</Type>
