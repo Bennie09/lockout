@@ -27,9 +27,16 @@ export function Button({ label, onPress, variant = 'primary', disabled, loading,
         style,
       ]}>
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.bg : colors.cream} />
+        <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? colors.bg : colors.cream} />
       ) : (
-        <Text style={[styles.label, variant === 'primary' && styles.primaryLabel]}>{label}</Text>
+        <Text
+          style={[
+            styles.label,
+            variant === 'primary' && styles.primaryLabel,
+            variant === 'danger' && styles.dangerLabel,
+          ]}>
+          {label}
+        </Text>
       )}
     </Pressable>
   );
@@ -52,9 +59,7 @@ const styles = StyleSheet.create({
     borderColor: colors.lineStrong,
   },
   danger: {
-    backgroundColor: 'rgba(211, 107, 79, 0.16)',
-    borderWidth: 1,
-    borderColor: 'rgba(211, 107, 79, 0.4)',
+    backgroundColor: colors.terracotta,
   },
   quiet: {
     backgroundColor: 'transparent',
@@ -68,5 +73,8 @@ const styles = StyleSheet.create({
   },
   primaryLabel: {
     color: colors.bg,
+  },
+  dangerLabel: {
+    color: colors.cream,
   },
 });

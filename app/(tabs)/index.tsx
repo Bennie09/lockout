@@ -61,7 +61,7 @@ export default function Home() {
         </View>
       </Card>
 
-      <SectionHeader title="Today’s hours" aside={`${schedule.length} windows`} />
+      <SectionHeader title="Today’s hours" aside={`${schedule.length} ${schedule.length === 1 ? 'window' : 'windows'}`} />
       <Card padded={false}>
         {schedule.length === 0 ? (
           <Pressable style={styles.empty} onPress={() => router.push({ pathname: '/window-editor', params: { target: 'universal' } })}>
